@@ -1,21 +1,36 @@
 var Twitter = require('twitter')
 var config = require('./config.js')
 var T = new Twitter(config)
+var statusURL = 'https://twitter.com/statuses/'
+
+var targetUserId = '@nick130586'
+var targetUserDisplayName = 'nick130586'
 
 // Set up your search parameters
+
+var keywordSearchParams = {
+	q: targetUserId,
+	count: 50,
+	result_type: 'recent',
+	lang: 'en',
+	screen_name: targetUserDisplayName
+}
+
 var mentionParams = {
-	q: '@nick130586',
+	q: targetUserId,
 	count: 1,
 	result_type: 'recent',
 	lang: 'en',
-	screen_name: "nick130586"
+	screen_name: targetUserDisplayName
 }
 
 var replyParams = {
 	count: 1,
 	lang: 'en',
-	screen_name: "nick130586"
+	screen_name: targetUserDisplayName
 }
+
+var keywordToSearchFor = ''
 
 var usersToMention = '' //add usernames separated by whitespace, for example, '@POTUS @VP @StateDept'
 
@@ -31,10 +46,24 @@ var TWEETS_TO_REPLY = [
 " "
 ];
 
+function findAndPrintLinksToTwees() {
+	// Get URLs to the user's recent tweets that contain a keyword
+	T.get('statuses/user_timeline', keywordSearchParams, function(err, data, response) {
+    	if (!err) {
+    		for (var i = 0; i < data.length; i++) {
+    			if (data[i].text.includes(keywordToSearchFor)) {
+    				console.log(statusURL + data[i].id_str)
+    			}
+    		}
+    	} else {
+    		console.log(err)
+    	}
+    })
+}
+
 function findAndReplyToMention() {
 	// Search for a recent tweet in English where nick130586 is mentioned and reply to it
 	T.get('search/tweets', mentionParams, function(err, data, response) {
-    	// If there is no error, proceed
     	if (!err) {
     		var latestTweet = data.statuses[0]
     		console.log(latestTweet)
@@ -95,8 +124,9 @@ function findAndReplyToTweet() {
 }
 
 function BotStart() {
-	findAndReplyToMention()
-	findAndReplyToTweet()
+	//findAndReplyToMention()
+	//findAndReplyToTweet()
+	findAndPrintLinksToTwees()
 }
 
 // Start bot and timer
